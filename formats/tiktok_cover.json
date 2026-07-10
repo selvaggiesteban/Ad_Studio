@@ -1,0 +1,9 @@
+{
+  "nombre": "TikTok Cover",
+  "descripcion": "Portada de video para TikTok",
+  "ancho": 1080,
+  "alto": 1920,
+  "orientacion": "vertical",
+  "plataformas": ["tiktok"],
+  "guia_composicion": "9:16, texto grande centrado, contraste alto, sin zonas muertas"
+}

@@ -1,0 +1,9 @@
+{
+  "nombre": "Facebook Post",
+  "descripcion": "Post para feed de Facebook",
+  "ancho": 1200,
+  "alto": 630,
+  "orientacion": "horizontal",
+  "plataformas": ["facebook"],
+  "guia_composicion": "1.91:1, texto legible, CTA claro, logo en esquina"
+}

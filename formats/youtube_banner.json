@@ -1,0 +1,9 @@
+{
+  "nombre": "YouTube Banner",
+  "descripcion": "Banner del canal de YouTube",
+  "ancho": 2560,
+  "alto": 1440,
+  "orientacion": "horizontal",
+  "plataformas": ["youtube"],
+  "guia_composicion": "Zona segura central 1546x423, nombre del canal centrado, redes abajo"
+}

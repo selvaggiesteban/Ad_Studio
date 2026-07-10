@@ -1,0 +1,9 @@
+{
+  "nombre": "LinkedIn Post",
+  "descripcion": "Post para feed de LinkedIn",
+  "ancho": 1200,
+  "alto": 627,
+  "orientacion": "horizontal",
+  "plataformas": ["linkedin"],
+  "guia_composicion": "1.91:1, profesional, dato o pregunta prominent, logo sutil"
+}

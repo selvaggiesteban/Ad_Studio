@@ -1,0 +1,9 @@
+{
+  "nombre": "Instagram Post",
+  "descripcion": "Post cuadrado para feed de Instagram",
+  "ancho": 1080,
+  "alto": 1080,
+  "orientacion": "cuadrado",
+  "plataformas": ["instagram"],
+  "guia_composicion": "Centrado, texto grande, marca de agua opcional en esquina"
+}

@@ -1,0 +1,9 @@
+{
+  "nombre": "Twitter/X Post",
+  "descripcion": "Post para feed de Twitter/X",
+  "ancho": 1600,
+  "alto": 900,
+  "orientacion": "horizontal",
+  "plataformas": ["twitter", "x"],
+  "guia_composicion": "16:9, visual impactante, texto minimo, grafico o dato clave"
+}

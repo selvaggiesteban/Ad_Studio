@@ -1,0 +1,9 @@
+{
+  "nombre": "YouTube Thumbnail",
+  "descripcion": "Miniatura para videos de YouTube",
+  "ancho": 1280,
+  "alto": 720,
+  "orientacion": "horizontal",
+  "plataformas": ["youtube"],
+  "guia_composicion": "16:9, texto 3-5 palabras, cara ocupa 30-50% si hay persona, alto contraste"
+}

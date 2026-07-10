@@ -1,0 +1,9 @@
+{
+  "nombre": "Pinterest Pin",
+  "descripcion": "Pin vertical para Pinterest",
+  "ancho": 1000,
+  "alto": 1500,
+  "orientacion": "vertical",
+  "plataformas": ["pinterest"],
+  "guia_composicion": "2:3 vertical, titulo arriba, imagen central, CTA abajo"
+}

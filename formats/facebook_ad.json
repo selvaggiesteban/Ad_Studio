@@ -1,0 +1,9 @@
+{
+  "nombre": "Facebook Ad",
+  "descripcion": "Anuncio para Meta Ads (Facebook/Instagram)",
+  "ancho": 1200,
+  "alto": 628,
+  "orientacion": "horizontal",
+  "plataformas": ["facebook", "instagram"],
+  "guia_composicion": "1.91:1, maximo 20% texto en imagen, headline abajo, CTA visible"
+}

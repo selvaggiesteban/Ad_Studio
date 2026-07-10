@@ -1,0 +1,9 @@
+{
+  "nombre": "Flyer A4",
+  "descripcion": "Flyer vertical A4 para impresion digital",
+  "ancho": 2480,
+  "alto": 3508,
+  "orientacion": "vertical",
+  "plataformas": ["impresion"],
+  "guia_composicion": "A4 vertical, margenes 200px, titulo arriba, detalles al medio, CTA abajo, logo en esquina"
+}

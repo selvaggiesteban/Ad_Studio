@@ -1,0 +1,9 @@
+{
+  "nombre": "Google Ads",
+  "descripcion": "Anuncio display para Google Ads",
+  "ancho": 1200,
+  "alto": 628,
+  "orientacion": "horizontal",
+  "plataformas": ["google"],
+  "guia_composicion": "1.91:1, limpio, headline claro, CTA, marca prominente"
+}

@@ -1,0 +1,9 @@
+{
+  "nombre": "Instagram Carousel",
+  "descripcion": "Carrusel de slides para Instagram/LinkedIn",
+  "ancho": 1080,
+  "alto": 1350,
+  "orientacion": "vertical",
+  "plataformas": ["instagram", "linkedin"],
+  "guia_composicion": "4:5 vertical, una idea por slide, texto maximo 15 palabras"
+}

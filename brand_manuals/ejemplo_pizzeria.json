@@ -1,0 +1,29 @@
+{
+  "nombre": "Pizzeria Don Carlos",
+  "descripcion": "Pizzeria artesanal italiana fundada en 1985, specializada en pizza napolitana",
+  "colores": {
+    "primario": "#C41E3A",
+    "secundario": "#FFD700",
+    "acento": "#2E8B57",
+    "fondo": "#FFFFFF",
+    "texto": "#1A1A1A"
+  },
+  "tipografia": {
+    "titulares": "Bebas Neue",
+    "cuerpo": "Open Sans"
+  },
+  "logo": null,
+  "tono": "casual, cordial, cercano, apasionado por la pizza",
+  "estilo": "fotos de comida real, colores vibrantes, estilo italiano rustico, iluminacion natural",
+  "prohibido": [
+    "textos genericos sin personalidad",
+    "colores neón",
+    "fotos stock de gente sonriente",
+    "fondos abstractos sin relacion con comida"
+  ],
+  "website": "https://ejemplo-pizzeria.com",
+  "redes": {
+    "instagram": "@pizzeriadoncarlos",
+    "facebook": "Pizzeria Don Carlos"
+  }
+}

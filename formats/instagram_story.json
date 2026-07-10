@@ -1,0 +1,9 @@
+{
+  "nombre": "Instagram Story",
+  "descripcion": "Historia vertical para Instagram",
+  "ancho": 1080,
+  "alto": 1920,
+  "orientacion": "vertical",
+  "plataformas": ["instagram"],
+  "guia_composicion": "Vertical completo, texto en tercio superior o central, CTA abajo"
+}

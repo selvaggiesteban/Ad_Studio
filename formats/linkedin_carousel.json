@@ -1,0 +1,9 @@
+{
+  "nombre": "LinkedIn Carousel",
+  "descripcion": "Carrusel profesional para LinkedIn",
+  "ancho": 1080,
+  "alto": 1350,
+  "orientacion": "vertical",
+  "plataformas": ["linkedin"],
+  "guia_composicion": "4:5 vertical, tono profesional, una idea por slide, max 15 palabras"
+}
