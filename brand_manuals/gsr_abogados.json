@@ -1,0 +1,76 @@
+{
+  "nombre": "Garcete Suarez Ronco Abogados",
+  "descripcion": "Estudio jurídico penal en Buenos Aires. Litigios complejos en fueros ordinario y federal.",
+  "colores": {
+    "primario": "#1D1412",
+    "secundario": "#F6E6D4",
+    "acento": "#301E14",
+    "fondo": "#F6E6D4",
+    "texto": "#1D1412",
+    "fondo_oscuro": "#1D1412",
+    "texto_claro": "#F6E6D4"
+  },
+  "tipografia": {
+    "titulares": "Trust 3A",
+    "titulares_stilo": "Light/Regular, serif elegante y clásica, estilo libros de derecho clásicos",
+    "cuerpo": "Bricollage Grotesque",
+    "cuerpo_stilo": "Light, sans-serif moderna, genera contraste con la principal"
+  },
+  "logo": "Monograma con iniciales de ambos apellidos + logotipo completo 'GARCETE SUÁREZ RONCO' separado por bullet en forma de estrella + bajada 'ABOGADOS'",
+  "tono": "profesional, serio, académico, directo, confiable, elegante, sin humor",
+  "estilo": "diseño austero, eje central que genera estabilidad y seriedad, pocos elementos con jerarquías bien marcadas, serif oscuras sobre fondo cálido, mucho espacio en blanco, tipografía elegante",
+  "estructura": "Eje central ordenador. Monograma o logotipo en parte superior o inferior. Jerarquías claras. Pocos elementos.",
+  "imagen": {
+    "temperatura": "cálida",
+    "retratos": "Seguridad, seriedad y cercanía. A color, levemente desaturados, evitar tonos fuertes.",
+    "contexto": "Libros de derecho, objetos de diseño de oficina, materiales de buena calidad. Jugar con foco/fuera de foco y cierto grano.",
+    "prohibido": "Fotos stock de gente sonriente, apretones de manos, colores que desentonen"
+  },
+  "prohibido": [
+    "rotar el logo",
+    "cambiar distribución de elementos",
+    "estirar forzado",
+    "cambiar el kerning",
+    "reemplazar tipografía del isologotipo",
+    "aplicar sombra paralela",
+    "usar en outline",
+    "usar logo como máscara para imágenes",
+    "aplicar color fuera de la identidad",
+    "colores neón o vivos",
+    "emojis o iconos informales",
+    "textos coloquiales o humorísticos",
+    "gradientes coloridos"
+  ],
+  "especialidades": [
+    "Derecho Penal Ordinario",
+    "Derecho Penal Federal",
+    "Derecho Penal Económico y de Empresa",
+    "Ejecución Penal"
+  ],
+  "abogados": [
+    {
+      "nombre": "Matías Alejandro Garcete Suárez",
+      "formacion": "Egresado de la Universidad de Buenos Aires",
+      "enfoque": "Litigación integral en casos de alta complejidad"
+    },
+    {
+      "nombre": "Benjamín Ronco",
+      "formacion": "Especialista en defensa penal de alta complejidad",
+      "enfoque": "Defensa penal federal, consultoría estratégica"
+    }
+  ],
+  "website": "https://gsrabogados.com.ar",
+  "contacto": {
+    "email": "info@gsrabogados.com.ar",
+    "telefono": "(+54) 9 11 5332-3937",
+    "direccion": "Cerrito 1054, 1°, Ciudad de Buenos Aires"
+  },
+  "frases_clave": [
+    "Cada caso es único. Lo defendemos como tal.",
+    "Sólida formación académica con destacada trayectoria en litigios complejos.",
+    "Asistencia técnica personalizada e inmediata.",
+    "Protegemos tu patrimonio, tu reputación y tu libertad.",
+    "Blindaje legal corporativo.",
+    "La complejidad de las causas penales contemporáneas exige un análisis que trasciende lo estrictamente jurídico."
+  ]
+}
