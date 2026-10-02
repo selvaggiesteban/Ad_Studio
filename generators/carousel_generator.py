@@ -1,35 +1,37 @@
 from pathlib import Path
-from brand.prompt_builder import construir_prompt_carrusel
-from generators.image_generator import generar_imagen, guardar_imagen
+import logging
+from brand.prompt_builder import build_carousel_prompts
+from generators.image_generator import generate_image, save_image
 
+logger = logging.getLogger("ad_studio")
 
-def generar_carrusel(titulo, puntos, marca, ruta_salida=None, slides=5):
-    if len(puntos) < slides - 2:
-        slides = len(puntos) + 2
+def generate_carousel(title, points, brand, output_path=None, slides=5):
+    if len(points) < slides - 2:
+        slides = len(points) + 2
 
-    prompts = construir_prompt_carrusel(titulo, puntos, marca, slides)
+    prompts = build_carousel_prompts(title, points, brand, slides)
 
-    if ruta_salida is None:
-        from ..config import ensure_output_dir
-        ruta_salida = ensure_output_dir() / "carruseles"
+    if output_path is None:
+        from config import ensure_output_dir
+        output_path = ensure_output_dir() / "carousels"
     else:
-        ruta_salida = Path(ruta_salida)
+        output_path = Path(output_path)
 
-    ruta_salida.mkdir(parents=True, exist_ok=True)
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    imagenes_generadas = []
+    generated_images = []
     for info in prompts:
-        num_slide = info["slide"]
-        tipo = info["tipo"]
+        slide_num = info["slide"]
+        slide_type = info["tipo"]
         prompt = info["prompt"]
 
-        print(f"  Slide {num_slide}/{slides} ({tipo})...")
-        img = generar_imagen(prompt, ancho=1080, alto=1350)
+        logger.info(f"  Slide {slide_num}/{slides} ({slide_type})...")
+        img = generate_image(prompt, width=1080, height=1350)
 
-        nombre_archivo = f"slide_{num_slide:02d}_{tipo}.png"
-        ruta_archivo = ruta_salida / nombre_archivo
-        guardar_imagen(img, ruta_archivo)
-        imagenes_generadas.append(ruta_archivo)
-        print(f"  Guardado: {ruta_archivo}")
+        filename = f"slide_{slide_num:02d}_{slide_type}.png"
+        file_path = output_path / filename
+        save_image(img, file_path)
+        generated_images.append(file_path)
+        logger.info(f"  Saved: {file_path}")
 
-    return imagenes_generadas
+    return generated_images

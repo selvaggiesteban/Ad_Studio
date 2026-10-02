@@ -2,30 +2,30 @@ import json
 from pathlib import Path
 
 
-CAMPOS_REQUERIDOS = ["nombre", "colores", "tono", "estilo"]
-CAMPOS_OPCIONALES = ["tipografia", "logo", "prohibido", "descripcion", "website", "redes"]
+REQUIRED_FIELDS = ["nombre", "colores", "tono", "estilo"]
+OPTIONAL_FIELDS = ["tipografia", "logo", "prohibido", "descripcion", "website", "redes"]
 
 
-def cargar_brand_manual(ruta):
-    ruta = Path(ruta)
-    if not ruta.exists():
-        raise FileNotFoundError(f"Brand manual no encontrado: {ruta}")
+def cargar_brand_manual(path):
+    path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Brand manual not found: {path}")
 
-    with open(ruta, "r", encoding="utf-8") as f:
-        marca = json.load(f)
+    with open(path, "r", encoding="utf-8") as f:
+        brand = json.load(f)
 
-    errores = []
-    for campo in CAMPOS_REQUERIDOS:
-        if campo not in marca:
-            errores.append(f"Falta campo requerido: {campo}")
+    errors = []
+    for field in REQUIRED_FIELDS:
+        if field not in brand:
+            errors.append(f"Missing required field: {field}")
 
-    if "colores" in marca:
+    if "colores" in brand:
         for color_key in ["primario", "secundario"]:
-            if color_key not in marca["colores"]:
-                errores.append(f"Falta color '{color_key}' en seccion colores")
+            if color_key not in brand["colores"]:
+                errors.append(f"Missing color '{color_key}' in colors section")
 
-    if errores:
-        raise ValueError(f"Brand manual invalido:\n" + "\n".join(f"  - {e}" for e in errores))
+    if errors:
+        raise ValueError(f"Invalid brand manual:\n" + "\n".join(f"  - {e}" for e in errors))
 
     defaults = {
         "tipografia": {"titulares": "Arial Bold", "cuerpo": "Arial"},
@@ -36,16 +36,16 @@ def cargar_brand_manual(ruta):
         "redes": {},
     }
     for key, val in defaults.items():
-        if key not in marca:
-            marca[key] = val
+        if key not in brand:
+            brand[key] = val
 
-    return marca
+    return brand
 
 
 def crear_brand_manual_ejemplo():
     return {
         "nombre": "Pizzeria Don Carlos",
-        "descripcion": "Pizzeria artesanal italiana fundada en 1985",
+        "descripcion": "Artisanal Italian pizzeria founded in 1985",
         "colores": {
             "primario": "#C41E3A",
             "secundario": "#FFD700",
@@ -58,14 +58,14 @@ def crear_brand_manual_ejemplo():
             "cuerpo": "Open Sans",
         },
         "logo": None,
-        "tono": "casual, cordial, cercano",
-        "estilo": "fotos de comida real, colores vibrantes, estilo italiano rustico",
+        "tono": "casual, cordial, friendly",
+        "estilo": "real food photos, vibrant colors, rustic Italian style",
         "prohibido": [
-            "textos genericos",
-            "colores neón",
-            "fotos stock de gente sonriente",
+            "generic texts",
+            "neon colors",
+            "stock photos of smiling people",
         ],
-        "website": "https://ejemplo-pizzeria.com",
+        "website": "https://example-pizzeria.com",
         "redes": {
             "instagram": "@pizzeriadoncarlos",
             "facebook": "Pizzeria Don Carlos",
@@ -73,9 +73,9 @@ def crear_brand_manual_ejemplo():
     }
 
 
-def guardar_brand_manual(marca, ruta):
-    ruta = Path(ruta)
-    ruta.parent.mkdir(parents=True, exist_ok=True)
-    with open(ruta, "w", encoding="utf-8") as f:
-        json.dump(marca, f, indent=2, ensure_ascii=False)
-    return ruta
+def guardar_brand_manual(brand, path):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(brand, f, indent=2, ensure_ascii=False)
+    return path

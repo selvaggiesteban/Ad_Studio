@@ -1,88 +1,90 @@
 import subprocess
 import shutil
+import logging
 from pathlib import Path
 
 from config import MONEY_PRINTER_TURBO_PATH
 
+logger = logging.getLogger("ad_studio")
 
-def verificar_money_printer_turbo():
+def verify_money_printer_turbo():
     if not MONEY_PRINTER_TURBO_PATH:
         return {
-            "status": "no_configurado",
-            "mensaje": "MONEY_PRINTER_TURBO_PATH no configurado en .env",
+            "status": "not_configured",
+            "message": "MONEY_PRINTER_TURBO_PATH not configured in .env",
         }
 
-    ruta = Path(MONEY_PRINTER_TURBO_PATH)
-    if not ruta.exists():
+    path = Path(MONEY_PRINTER_TURBO_PATH)
+    if not path.exists():
         return {
-            "status": "no_encontrado",
-            "mensaje": f"Directorio no encontrado: {ruta}",
+            "status": "not_found",
+            "message": f"Directory not found: {path}",
         }
 
-    cli = ruta / "cli.py"
-    config = ruta / "config.toml"
-    config_ejemplo = ruta / "config.example.toml"
+    cli = path / "cli.py"
+    config = path / "config.toml"
+    config_example = path / "config.example.toml"
 
     if not cli.exists():
         return {
-            "status": "invalido",
-            "mensaje": "cli.py no encontrado en el directorio",
+            "status": "invalid",
+            "message": "cli.py not found in the directory",
         }
 
-    if not config.exists() and not config_ejemplo.exists():
+    if not config.exists() and not config_example.exists():
         return {
-            "status": "sin_configurar",
-            "mensaje": "Falta config.toml (copiar de config.example.toml)",
+            "status": "not_configured",
+            "message": "Missing config.toml (copy from config.example.toml)",
         }
 
     return {
         "status": "ok",
-        "mensaje": "MoneyPrinterTurbo encontrado y configurado",
-        "ruta": str(ruta),
+        "message": "MoneyPrinterTurbo found and configured",
+        "path": str(path),
     }
 
 
-def generar_video(prompt, duracion=15, aspecto="9:16", idioma="es", marca=None):
-    estado = verificar_money_printer_turbo()
-    if estado["status"] != "ok":
+def generate_video(prompt, duration=15, aspect="9:16", language="en", brand=None):
+    status = verify_money_printer_turbo()
+    if status["status"] != "ok":
         raise RuntimeError(
-            f"MoneyPrinterTurbo no disponible: {estado['mensaje']}. "
-            f"Configura MONEY_PRINTER_TURBO_PATH en .env"
+            f"MoneyPrinterTurbo unavailable: {status['message']}. "
+            f"Configure MONEY_PRINTER_TURBO_PATH in .env"
         )
 
-    ruta_mpt = Path(estado["ruta"])
-    cli_path = ruta_mpt / "cli.py"
+    mpt_path = Path(status["path"])
+    cli_path = mpt_path / "cli.py"
 
     args = [
         "python",
         str(cli_path),
         "--video-subject", prompt,
-        "--video-aspect", aspecto,
-        "--video-language", idioma,
+        "--video-aspect", aspect,
+        "--video-language", language,
         "--stop-at", "video",
     ]
 
-    print(f"  [MoneyPrinterTurbo] Generando video...")
-    print(f"  Prompt: {prompt}")
-    print(f"  Aspecto: {aspecto}")
+    logger.info(f"  [MoneyPrinterTurbo] Generating video...")
+    logger.info(f"  Prompt: {prompt}")
+    logger.info(f"  Aspect: {aspect}")
 
-    resultado = subprocess.run(
+    result = subprocess.run(
         args,
-        cwd=str(ruta_mpt),
+        cwd=str(mpt_path),
         capture_output=True,
         text=True,
         timeout=600,
     )
 
-    if resultado.returncode != 0:
+    if result.returncode != 0:
         raise RuntimeError(
-            f"MoneyPrinterTurbo fallo (codigo {resultado.returncode}):\n"
-            f"{resultado.stderr}"
+            f"MoneyPrinterTurbo failed (code {result.returncode}):\n"
+            f"{result.stderr}"
         )
 
-    print(f"  [MoneyPrinterTerbo] Video generado exitosamente")
+    logger.info(f"  [MoneyPrinterTurbo] Video generated successfully")
 
-    output_dir = ruta_mpt / "output"
+    output_dir = mpt_path / "output"
     if output_dir.exists():
         videos = sorted(output_dir.glob("*.mp4"), key=lambda f: f.stat().st_mtime, reverse=True)
         if videos:

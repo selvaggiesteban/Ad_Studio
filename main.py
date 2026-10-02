@@ -1,291 +1,306 @@
 #!/usr/bin/env python3
 """
-ad_studio - Generador de contenido visual para redes sociales
-CLI en español que genera imágenes y videos usando IA.
+ad_studio - Visual Content Generator for Social Media
+English CLI that generates images and videos using AI.
 """
 
 import argparse
 import json
 import sys
+import logging
 from pathlib import Path
 
-from config import OUTPUT_DIR, BRAND_DIR, FORMATS_DIR
+from config import OUTPUT_DIR, BRAND_DIR, FORMATS_DIR, ensure_output_dir
 from brand.loader import cargar_brand_manual, crear_brand_manual_ejemplo, guardar_brand_manual
-from brand.prompt_builder import construir_prompt
+from brand.prompt_builder import build_prompt, build_carousel_prompts, build_thumbnail_prompt
 from brand import cargar_formato, listar_formatos
-from generators.image_generator import generar_imagen, guardar_imagen, verificar_motores
-from generators.carousel_generator import generar_carrusel
-from generators.thumbnail_generator import generar_thumbnail
-from generators.video_generator import generar_video, verificar_money_printer_turbo
+from generators.image_generator import generate_image, save_image, verify_engines
+from generators.carousel_generator import generate_carousel
+from generators.thumbnail_generator import generate_thumbnail
+from generators.video_generator import generate_video, verify_money_printer_turbo
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(levelname)s: %(message)s'
+)
+logger = logging.getLogger("ad_studio")
 
-def cmd_imagen(args):
-    print(f"\n{'='*60}")
-    print(f"  Generando imagen: {args.tipo}")
-    print(f"{'='*60}\n")
+def cmd_image(args):
+    logger.info(f"Generating image: {args.type}")
 
-    marca = None
-    if args.marca:
-        print(f"Cargando brand manual: {args.marca}")
-        marca = cargar_brand_manual(args.marca)
-        print(f"  Marca: {marca['nombre']}\n")
+    brand = None
+    if args.brand:
+        logger.info(f"Loading brand manual: {args.brand}")
+        brand = cargar_brand_manual(args.brand)
+        logger.info(f"Brand: {brand['nombre']}")
 
-    formato = None
+    format_data = None
     try:
-        formato = cargar_formato(args.tipo)
-        print(f"Formato: {formato['nombre']} ({formato['ancho']}x{formato['alto']})\n")
+        format_data = cargar_formato(args.type)
+        logger.info(f"Format: {format_data['nombre']} ({format_data['ancho']}x{format_data['alto']})")
     except FileNotFoundError:
-        print(f"Formato '{args.tipo}' no encontrado, usando 1024x1024 por defecto\n")
-        formato = {"ancho": 1024, "alto": 1024}
+        logger.warning(f"Format '{args.type}' not found, using 1024x1024 default")
+        format_data = {"ancho": 1024, "alto": 1024}
 
-    if marca:
-        prompt = construir_prompt(args.prompt, marca, formato)
+    if brand:
+        prompt = build_prompt(args.prompt, brand, format_data)
     else:
         prompt = args.prompt
 
-    print(f"Prompt: {prompt[:200]}...\n" if len(prompt) > 200 else f"Prompt: {prompt}\n")
+    logger.info(f"Prompt: {prompt[:200]}..." if len(prompt) > 200 else f"Prompt: {prompt}")
 
-    img = generar_imagen(
+    img = generate_image(
         prompt,
-        ancho=formato["ancho"],
-        alto=formato["alto"],
-        modelo=args.modelo,
+        width=format_data["ancho"],
+        height=format_data["alto"],
+        model=args.model,
     )
 
-    nombre_limpio = args.prompt.lower().replace(" ", "_")[:50]
-    nombre_archivo = f"{args.tipo}_{nombre_limpio}.png"
-    ruta = OUTPUT_DIR / nombre_archivo
-    guardar_imagen(img, ruta)
+    # OS-Agnostic Pathing: Output subfolder by brand
+    brand_name = brand['nombre'].lower().replace(" ", "_") if brand else "general"
+    ensure_output_dir()
+    final_output_dir = OUTPUT_DIR / brand_name
+    final_output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"\nImagen guardada: {ruta}")
-    return ruta
+    clean_name = args.prompt.lower().replace(" ", "_")[:50]
+    filename = f"{args.type}_{clean_name}.png"
+    path = final_output_dir / filename
+    save_image(img, path)
+
+    logger.info(f"Image saved: {path}")
+    return path
 
 
-def cmd_carrusel(args):
-    print(f"\n{'='*60}")
-    print(f"  Generando carrusel: {args.titulo}")
-    print(f"{'='*60}\n")
+def cmd_carousel(args):
+    logger.info(f"Generating carousel: {args.title}")
 
-    marca = None
-    if args.marca:
-        print(f"Cargando brand manual: {args.marca}")
-        marca = cargar_brand_manual(args.marca)
-        print(f"  Marca: {marca['nombre']}\n")
+    brand = None
+    if args.brand:
+        logger.info(f"Loading brand manual: {args.brand}")
+        brand = cargar_brand_manual(args.brand)
+        logger.info(f"Brand: {brand['nombre']}")
 
-    if not marca:
-        marca = crear_brand_manual_ejemplo()
-        print("Usando brand manual de ejemplo\n")
+    if not brand:
+        brand = crear_brand_manual_ejemplo()
+        logger.info("Using example brand manual")
 
-    puntos = args.puntos if args.puntos else [f"Punto {i+1}" for i in range(args.slides - 2)]
+    points = args.points if args.points else [f"Point {i+1}" for i in range(args.slides - 2)]
 
-    ruta_salida = OUTPUT_DIR / "carruseles"
-    imagenes = generar_carrusel(args.titulo, puntos, marca, ruta_salida, args.slides)
+    brand_name = brand['nombre'].lower().replace(" ", "_") if brand else "general"
+    ensure_output_dir()
+    output_path = OUTPUT_DIR / brand_name / "carousels"
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    print(f"\nCarrusel generado: {len(imagenes)} slides en {ruta_salida}")
-    return imagenes
+    images = generate_carousel(args.title, points, brand, output_path, args.slides)
+
+    logger.info(f"Carousel generated: {len(images)} slides in {output_path}")
+    return images
 
 
 def cmd_thumbnail(args):
-    print(f"\n{'='*60}")
-    print(f"  Generando miniatura YouTube")
-    print(f"{'='*60}\n")
+    logger.info(f"Generating YouTube thumbnail")
 
-    marca = None
-    if args.marca:
-        print(f"Cargando brand manual: {args.marca}")
-        marca = cargar_brand_manual(args.marca)
-        print(f"  Marca: {marca['nombre']}\n")
+    brand = None
+    if args.brand:
+        logger.info(f"Loading brand manual: {args.brand}")
+        brand = cargar_brand_manual(args.brand)
+        logger.info(f"Brand: {brand['nombre']}")
 
-    if not marca:
-        marca = crear_brand_manual_ejemplo()
-        print("Usando brand manual de ejemplo\n")
+    if not brand:
+        brand = crear_brand_manual_ejemplo()
+        logger.info("Using example brand manual")
 
-    ruta = generar_thumbnail(args.titulo, marca, args.tono)
+    path = generate_thumbnail(args.title, brand, args.tone)
 
-    print(f"\nMiniatura guardada: {ruta}")
-    return ruta
+    # Move to brand folder
+    brand_name = brand['nombre'].lower().replace(" ", "_") if brand else "general"
+    ensure_output_dir()
+    final_dir = OUTPUT_DIR / brand_name
+    final_dir.mkdir(parents=True, exist_ok=True)
+
+    logger.info(f"Thumbnail saved: {path}")
+    return path
 
 
 def cmd_video(args):
-    print(f"\n{'='*60}")
-    print(f"  Generando video: {args.prompt}")
-    print(f"{'='*60}\n")
+    logger.info(f"Generating video: {args.prompt}")
 
-    marca = None
-    if args.marca:
-        print(f"Cargando brand manual: {args.marca}")
-        marca = cargar_brand_manual(args.marca)
-        print(f"  Marca: {marca['nombre']}\n")
+    brand = None
+    if args.brand:
+        logger.info(f"Loading brand manual: {args.brand}")
+        brand = cargar_brand_manual(args.brand)
+        logger.info(f"Brand: {brand['nombre']}")
 
-    video_path = generar_video(
+    video_path = generate_video(
         args.prompt,
-        duracion=args.duracion,
-        aspecto=args.aspecto,
-        idioma=args.idioma,
-        marca=marca,
+        duration=args.duration,
+        aspect=args.aspect,
+        language=args.language,
+        brand=brand,
     )
 
     if video_path:
-        print(f"\nVideo guardado: {video_path}")
+        brand_name = brand['nombre'].lower().replace(" ", "_") if brand else "general"
+        ensure_output_dir()
+        final_dir = OUTPUT_DIR / brand_name
+        final_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Video saved: {video_path}")
     else:
-        print("\nVideo generado pero no se encontro el archivo de salida")
+        logger.warning("Video generated but output file not found")
 
     return video_path
 
 
-def cmd_lote(args):
-    print(f"\n{'='*60}")
-    print(f"  Generando lote desde: {args.archivo}")
-    print(f"{'='*60}\n")
+def cmd_batch(args):
+    logger.info(f"Generating batch from: {args.file}")
 
-    with open(args.archivo, "r", encoding="utf-8") as f:
+    with open(args.file, "r", encoding="utf-8") as f:
         posts = json.load(f)
 
-    marca = None
-    if args.marca:
-        print(f"Cargando brand manual: {args.marca}")
-        marca = cargar_brand_manual(args.marca)
-        print(f"  Marca: {marca['nombre']}\n")
+    brand = None
+    if args.brand:
+        logger.info(f"Loading brand manual: {args.brand}")
+        brand = cargar_brand_manual(args.brand)
+        logger.info(f"Brand: {brand['nombre']}")
 
-    resultados = []
+    results = []
     for i, post in enumerate(posts, 1):
-        print(f"\n--- Post {i}/{len(posts)} ---")
-        tipo = post.get("tipo", "instagram_post")
+        logger.info(f"--- Post {i}/{len(posts)} ---")
+        post_type = post.get("tipo", "instagram_post")
         prompt = post.get("prompt", "")
 
         try:
-            formato = cargar_formato(tipo)
+            format_data = cargar_formato(post_type)
         except FileNotFoundError:
-            formato = {"ancho": 1024, "alto": 1024}
+            format_data = {"ancho": 1024, "alto": 1024}
 
-        if marca:
-            prompt_completo = construir_prompt(prompt, marca, formato)
+        if brand:
+            prompt_complete = build_prompt(prompt, brand, format_data)
         else:
-            prompt_completo = prompt
+            prompt_complete = prompt
 
-        img = generar_imagen(prompt_completo, ancho=formato["ancho"], alto=formato["alto"])
+        img = generate_image(prompt_complete, width=format_data["ancho"], height=format_data["alto"])
 
-        nombre_limpio = prompt.lower().replace(" ", "_")[:50]
-        nombre_archivo = f"{tipo}_{i:03d}_{nombre_limpio}.png"
-        ruta = OUTPUT_DIR / nombre_archivo
-        guardar_imagen(img, ruta)
-        resultados.append(str(ruta))
-        print(f"  Guardado: {ruta}")
+        brand_name = brand['nombre'].lower().replace(" ", "_") if brand else "general"
+        ensure_output_dir()
+        final_dir = OUTPUT_DIR / brand_name
+        final_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"\nLote completado: {len(resultados)} imagenes generadas")
-    return resultados
+        clean_name = prompt.lower().replace(" ", "_")[:50]
+        filename = f"{post_type}_{i:03d}_{clean_name}.png"
+        path = final_dir / filename
+        save_image(img, path)
+        results.append(str(path))
+        logger.info(f"Saved: {path}")
+
+    logger.info(f"Batch completed: {len(results)} images generated")
+    return results
 
 
-def cmd_formatos(args):
-    formatos = listar_formatos()
-    print(f"\n{'='*60}")
-    print(f"  Formatos disponibles ({len(formatos)})")
-    print(f"{'='*60}\n")
+def cmd_formats(args):
+    formats = listar_formatos()
+    logger.info(f"Available formats ({len(formats)})")
 
-    for fmt in formatos:
-        plataformas = ", ".join(fmt["plataformas"])
+    for fmt in formats:
+        platforms = ", ".join(fmt["plataformas"])
         print(f"  {fmt['nombre']:<25} {fmt['ancho']:>5}x{fmt['alto']:<5}  [{plataformas}]")
 
-    print()
-    return formatos
+    return formats
 
 
-def cmd_verificar(args):
-    print(f"\n{'='*60}")
-    print(f"  Verificando motores de generacion")
-    print(f"{'='*60}\n")
+def cmd_verify(args):
+    logger.info("Verifying generation engines")
 
-    resultados = verificar_motores()
+    results = verify_engines()
 
-    for motor, info in resultados.items():
+    for engine, info in results.items():
         status = info["status"]
-        simbolo = "OK" if status == "ok" else "FALLO"
-        print(f"  [{simbolo}] {motor}: {info.get('mensaje', status)}")
+        symbol = "OK" if status == "ok" else "FAIL"
+        logger.info(f"  [{symbol}] {engine}: {info.get('mensaje', status)}")
 
-    estado_mpt = verificar_money_printer_turbo()
-    simbolo = "OK" if estado_mpt["status"] == "ok" else "INFO"
-    print(f"  [{simbolo}] money_printer_turbo: {estado_mpt['mensaje']}")
+    mpt_status = verify_money_printer_turbo()
+    symbol = "OK" if mpt_status["status"] == "ok" else "INFO"
+    logger.info(f"  [{symbol}] money_printer_turbo: {mpt_status['mensaje']}")
 
-    print()
-    return resultados
+    return results
 
 
-def cmd_marca(args):
-    if args.crear:
-        print(f"\nCreando brand manual: {args.crear}")
-        marca = crear_brand_manual_ejemplo()
-        marca["nombre"] = args.crear
-        ruta = BRAND_DIR / f"{args.crear.lower().replace(' ', '_')}.json"
-        guardar_brand_manual(marca, ruta)
-        print(f"Brand manual creado: {ruta}")
-        print("Edita el archivo para personalizar colores, estilo, etc.")
-        return ruta
+def cmd_brand(args):
+    if args.create:
+        logger.info(f"Creating brand manual: {args.create}")
+        brand = crear_brand_manual_ejemplo()
+        brand["nombre"] = args.create
+        path = BRAND_DIR / f"{args.create.lower().replace(' ', '_')}.json"
+        guardar_brand_manual(brand, path)
+        logger.info(f"Brand manual created: {path}")
+        logger.info("Edit the file to customize colors, style, etc.")
+        return path
 
-    if args.listar:
-        print(f"\nBrand manuals disponibles:")
-        for archivo in sorted(BRAND_DIR.glob("*.json")):
-            with open(archivo, "r", encoding="utf-8") as f:
+    if args.list:
+        logger.info("Available brand manuals:")
+        for file in sorted(BRAND_DIR.glob("*.json")):
+            with open(file, "r", encoding="utf-8") as f:
                 m = json.load(f)
-            print(f"  {archivo.stem}: {m.get('nombre', 'Sin nombre')}")
-        print()
+            logger.info(f"  {file.stem}: {m.get('nombre', 'Sin nombre')}")
         return
 
-    print("\nUso:")
-    print("  python main.py marca --crear 'NombreMarca'")
-    print("  python main.py marca --listar")
+    print("\nUsage:")
+    print("  python main.py brand --create 'BrandName'")
+    print("  python main.py brand --list")
 
 
 def main():
     parser = argparse.ArgumentParser(
         prog="ad_studio",
-        description="Generador de contenido visual para redes sociales",
+        description="Visual Content Generator for Social Media",
     )
-    subparsers = parser.add_subparsers(dest="comando", help="Comandos disponibles")
+    subparsers = parser.add_subparsers(dest="comando", help="Available commands")
 
-    p_imagen = subparsers.add_parser("imagen", help="Generar imagen para una red social")
-    p_imagen.add_argument("--tipo", required=True, help="Tipo de formato (ej: instagram_post)")
-    p_imagen.add_argument("--prompt", required=True, help="Descripcion de la imagen")
-    p_imagen.add_argument("--marca", help="Ruta al brand manual JSON")
-    p_imagen.add_argument("--modelo", default="schnell", choices=["schnell", "dev", "kontext"])
-    p_imagen.set_defaults(func=cmd_imagen)
+    p_image = subparsers.add_parser("image", help="Generate image for a social network")
+    p_image.add_argument("--type", required=True, help="Format type (e.g., instagram_post)")
+    p_image.add_argument("--prompt", required=True, help="Image description")
+    p_image.add_argument("--brand", help="Path to brand manual JSON")
+    p_image.add_argument("--model", default="schnell", choices=["schnell", "dev", "kontext"])
+    p_image.set_defaults(func=cmd_image)
 
-    p_carrusel = subparsers.add_parser("carrusel", help="Generar carrusel slide-by-slide")
-    p_carrusel.add_argument("--titulo", required=True, help="Titulo del carrusel")
-    p_carrusel.add_argument("--puntos", nargs="+", help="Puntos/ideas por slide")
-    p_carrusel.add_argument("--slides", type=int, default=5, help="Numero de slides (default: 5)")
-    p_carrusel.add_argument("--marca", help="Ruta al brand manual JSON")
-    p_carrusel.set_defaults(func=cmd_carrusel)
+    p_carousel = subparsers.add_parser("carousel", help="Generate carousel slide-by-slide")
+    p_carousel.add_argument("--title", required=True, help="Carousel title")
+    p_carousel.add_argument("--points", nargs="+", help="Points/ideas per slide")
+    p_carousel.add_argument("--slides", type=int, default=5, help="Number of slides (default: 5)")
+    p_carousel.add_argument("--brand", help="Path to brand manual JSON")
+    p_carousel.set_defaults(func=cmd_carousel)
 
-    p_thumb = subparsers.add_parser("thumbnail", help="Generar miniatura YouTube")
-    p_thumb.add_argument("--titulo", required=True, help="Titulo del video")
-    p_thumb.add_argument("--marca", help="Ruta al brand manual JSON")
-    p_thumb.add_argument("--tono", default="profesional",
-                         choices=["profesional", "casual", "sorpresa", "curioso", "directo"])
+    p_thumb = subparsers.add_parser("thumbnail", help="Generate YouTube thumbnail")
+    p_thumb.add_argument("--title", required=True, help="Title of the video")
+    p_thumb.add_argument("--brand", help="Path to brand manual JSON")
+    p_thumb.add_argument("--tone", default="professional",
+                         choices=["professional", "casual", "surprise", "curious", "direct"])
     p_thumb.set_defaults(func=cmd_thumbnail)
 
-    p_video = subparsers.add_parser("video", help="Generar video corto (MoneyPrinterTurbo)")
-    p_video.add_argument("--prompt", required=True, help="Tema del video")
-    p_video.add_argument("--duracion", type=int, default=15, help="Duracion en segundos")
-    p_video.add_argument("--aspecto", default="9:16", choices=["9:16", "16:9"])
-    p_video.add_argument("--idioma", default="es", help="Idioma del script")
-    p_video.add_argument("--marca", help="Ruta al brand manual JSON")
+    p_video = subparsers.add_parser("video", help="Generate short video (MoneyPrinterTurbo)")
+    p_video.add_argument("--prompt", required=True, help="Video theme")
+    p_video.add_argument("--duration", type=int, default=15, help="Duration in seconds")
+    p_video.add_argument("--aspect", default="9:16", choices=["9:16", "16:9"])
+    p_video.add_argument("--language", default="en", help="Script language")
+    p_video.add_argument("--brand", help="Path to brand manual JSON")
     p_video.set_defaults(func=cmd_video)
 
-    p_lote = subparsers.add_parser("lote", help="Generar batch de imagenes desde JSON")
-    p_lote.add_argument("--archivo", required=True, help="Ruta al archivo JSON con posts")
-    p_lote.add_argument("--marca", help="Ruta al brand manual JSON")
-    p_lote.set_defaults(func=cmd_lote)
+    p_batch = subparsers.add_parser("batch", help="Generate batch of images from JSON")
+    p_batch.add_argument("--file", required=True, help="Path to JSON file with posts")
+    p_batch.add_argument("--brand", help="Path to brand manual JSON")
+    p_batch.set_defaults(func=cmd_batch)
 
-    p_formatos = subparsers.add_parser("formatos", help="Listar formatos disponibles")
-    p_formatos.set_defaults(func=cmd_formatos)
+    p_formats = subparsers.add_parser("formats", help="List available formats")
+    p_formats.set_defaults(func=cmd_formats)
 
-    p_verificar = subparsers.add_parser("verificar", help="Verificar motores disponibles")
-    p_verificar.set_defaults(func=cmd_verificar)
+    p_verify = subparsers.add_parser("verify", help="Verify available engines")
+    p_verify.set_defaults(func=cmd_verify)
 
-    p_marca = subparsers.add_parser("marca", help="Gestionar brand manuals")
-    p_marca.add_argument("--crear", help="Crear nuevo brand manual con nombre")
-    p_marca.add_argument("--listar", action="store_true", help="Listar brand manuals")
-    p_marca.set_defaults(func=cmd_marca)
+    p_brand = subparsers.add_parser("brand", help="Manage brand manuals")
+    p_brand.add_argument("--create", help="Create new brand manual with name")
+    p_brand.add_argument("--list", action="store_true", help="List brand manuals")
+    p_brand.set_defaults(func=cmd_brand)
 
     args = parser.parse_args()
 

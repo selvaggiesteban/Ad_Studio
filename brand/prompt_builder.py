@@ -1,105 +1,105 @@
-def construir_prompt(descripcion, marca, formato=None, idioma="es"):
-    colores = marca.get("colores", {})
-    estilo = marca.get("estilo", "")
-    tono = marca.get("tono", "")
-    tipografia = marca.get("tipografia", {})
-    prohibido = marca.get("prohibido", [])
+def build_prompt(description, brand, format_data=None, language="en"):
+    colors = brand.get("colores", {})
+    style = brand.get("estilo", "")
+    tone = brand.get("tono", "")
+    typography = brand.get("tipografia", {})
+    forbidden = brand.get("prohibido", [])
 
-    partes = []
+    parts = []
 
-    partes.append(f"Crea una imagen para {marca['nombre']}.")
+    parts.append(f"Create an image for {brand['nombre']}.")
 
-    if descripcion:
-        partes.append(f"Contenido: {descripcion}")
+    if description:
+        parts.append(f"Content: {description}")
 
-    if estilo:
-        partes.append(f"Estilo visual: {estilo}")
+    if style:
+        parts.append(f"Visual style: {style}")
 
-    if tono:
-        partes.append(f"Tono: {tono}")
+    if tone:
+        parts.append(f"Tone: {tone}")
 
-    if colores:
-        colores_str = ", ".join(
-            f"{k}: {v}" for k, v in colores.items() if k in ["primario", "secundario", "acento"]
+    if colors:
+        colors_str = ", ".join(
+            f"{k}: {v}" for k, v in colors.items() if k in ["primario", "secundario", "acento"]
         )
-        if colores_str:
-            partes.append(f"Paleta de colores: {colores_str}")
+        if colors_str:
+            parts.append(f"Color palette: {colors_str}")
 
-        if "fondo" in colores:
-            partes.append(f"Fondo: {colores['fondo']}")
+        if "fondo" in colors:
+            parts.append(f"Background: {colors['fondo']}")
 
-        if "texto" in colores:
-            partes.append(f"Color de texto: {colores['texto']}")
+        if "texto" in colors:
+            parts.append(f"Text color: {colors['texto']}")
 
-    if tipografia:
-        titulares = tipografia.get("titulares", "")
-        if titulares:
-            partes.append(f"Tipografia de titulares: {titulares}, bold, grande, legible")
+    if typography:
+        headers = typography.get("titulares", "")
+        if headers:
+            parts.append(f"Header typography: {headers}, bold, large, legible")
 
-    if formato:
-        partes.append(f"Formato: {formato.get('ancho')}x{formato.get('alto')} px")
-        if "orientacion" in formato:
-            partes.append(f"Orientacion: {formato['orientacion']}")
-        if "guia_composicion" in formato:
-            partes.append(f"Composicion: {formato['guia_composicion']}")
+    if format_data:
+        parts.append(f"Format: {format_data.get('ancho')}x{format_data.get('alto')} px")
+        if "orientacion" in format_data:
+            parts.append(f"Orientation: {format_data['orientacion']}")
+        if "guia_composicion" in format_data:
+            parts.append(f"Composition: {format_data['guia_composicion']}")
 
-    if prohibido:
-        partes.append("NO incluir: " + ", ".join(prohibido))
+    if forbidden:
+        parts.append("DO NOT include: " + ", ".join(forbidden))
 
-    partes.append("Sin marcas de agua, sin logos de plataformas, imagen profesional de alta calidad.")
+    parts.append("No watermarks, no platform logos, professional high-quality image.")
 
-    return " ".join(partes)
+    return " ".join(parts)
 
 
-def construir_prompt_carrusel(titulo, puntos, marca, slides=5):
+def build_carousel_prompts(title, points, brand, slides=5):
     prompts = []
 
-    colores = marca.get("colores", {})
-    estilo = marca.get("estilo", "")
-    tono = marca.get("tono", "")
+    colors = brand.get("colores", {})
+    style = brand.get("estilo", "")
+    tone = brand.get("tono", "")
 
-    prompt_portada = (
-        f"Crea la portada de un carrusel para {marca['nombre']}. "
-        f"Titulo grande y llamativo: '{titulo}'. "
-        f"Estilo: {estilo}. Tono: {tono}. "
-        f"Colores: primario {colores.get('primario', '#000')}, "
-        f"secundario {colores.get('secundario', '#FFF')}. "
-        f"Formato 1080x1350 px. Moderno, profesional, sin marcas de agua."
+    cover_prompt = (
+        f"Create the cover slide of a carousel for {brand['nombre']}. "
+        f"Large and eye-catching title: '{title}'. "
+        f"Style: {style}. Tone: {tone}. "
+        f"Colors: primary {colors.get('primario', '#000')}, "
+        f"secondary {colors.get('secundario', '#FFF')}. "
+        f"Format 1080x1350 px. Modern, professional, no watermarks."
     )
-    prompts.append({"slide": 1, "tipo": "portada", "prompt": prompt_portada})
+    prompts.append({"slide": 1, "tipo": "portada", "prompt": cover_prompt})
 
-    for i, punto in enumerate(puntos[:slides - 2], start=2):
-        prompt_slide = (
-            f"Crea el slide {i} de un carrusel para {marca['nombre']}. "
-            f"Titulo: '{punto}'. "
-            f"Una idea por slide, texto maximo 15 palabras. "
-            f"Estilo: {estilo}. Colores: primario {colores.get('primario', '#000')}, "
-            f"secundario {colores.get('secundario', '#FFF')}. "
-            f"Formato 1080x1350 px. Visual moderno, sin marcas de agua."
+    for i, point in enumerate(points[:slides - 2], start=2):
+        slide_prompt = (
+            f"Create slide {i} of a carousel for {brand['nombre']}. "
+            f"Title: '{point}'. "
+            f"One idea per slide, maximum 15 words of text. "
+            f"Style: {style}. Colors: primary {colors.get('primario', '#000')}, "
+            f"secondary {colors.get('secundario', '#FFF')}. "
+            f"Format 1080x1350 px. Modern visual, no watermarks."
         )
-        prompts.append({"slide": i, "tipo": "contenido", "prompt": prompt_slide})
+        prompts.append({"slide": i, "tipo": "contenido", "prompt": slide_prompt})
 
-    prompt_cta = (
-        f"Crea el slide final (CTA) de un carrusel para {marca['nombre']}. "
-        f"Invita a seguir, compartir o visitar. "
-        f"Estilo: {estilo}. Colores: primario {colores.get('primario', '#000')}. "
-        f"Formato 1080x1350 px. Llamativo, sin marcas de agua."
+    cta_prompt = (
+        f"Create the final slide (CTA) of a carousel for {brand['nombre']}. "
+        f"Invite to follow, share or visit. "
+        f"Style: {style}. Colors: primary {colors.get('primario', '#000')}. "
+        f"Format 1080x1350 px. Eye-catching, no watermarks."
     )
-    prompts.append({"slide": slides, "tipo": "cta", "prompt": prompt_cta})
+    prompts.append({"slide": slides, "tipo": "cta", "prompt": cta_prompt})
 
     return prompts
 
 
-def construir_prompt_thumbnail(titulo, marca, tono="profesional"):
-    colores = marca.get("colores", {})
-    estilo = marca.get("estilo", "")
+def build_thumbnail_prompt(title, brand, tone="professional"):
+    colors = brand.get("colores", {})
+    style = brand.get("estilo", "")
 
     return (
-        f"Crea una miniatura de YouTube para {marca['nombre']}. "
-        f"Titulo en texto grande (3-5 palabras): '{titulo}'. "
-        f"Estilo: {estilo}. Tono: {tono}. "
-        f"Colores: primario {colores.get('primario', '#000')}, "
-        f"acento {colores.get('acento', '#FF0000')}. "
-        f"Formato 1280x720 px. Cara ocupa 30-50% del frame si hay persona. "
-        f"Texto legible en movil. Sin marcas de agua, sin logos de YouTube."
+        f"Create a YouTube thumbnail for {brand['nombre']}. "
+        f"Large text title (3-5 words): '{title}'. "
+        f"Style: {style}. Tone: {tone}. "
+        f"Colors: primary {colors.get('primario', '#000')}, "
+        f"accent {colors.get('acento', '#FF0000')}. "
+        f"Format 1280x720 px. Face occupies 30-50% of the frame if a person is present. "
+        f"Text legible on mobile. No watermarks, no YouTube logos."
     )

@@ -1,26 +1,28 @@
 from pathlib import Path
-from brand.prompt_builder import construir_prompt_thumbnail
-from generators.image_generator import generar_imagen, guardar_imagen
+import logging
+from brand.prompt_builder import build_thumbnail_prompt
+from generators.image_generator import generate_image, save_image
 
+logger = logging.getLogger("ad_studio")
 
-def generar_thumbnail(titulo, marca, tono="profesional", ruta_salida=None):
-    prompt = construir_prompt_thumbnail(titulo, marca, tono)
+def generate_thumbnail(title, brand, tone="professional", output_path=None):
+    prompt = build_thumbnail_prompt(title, brand, tone)
 
-    if ruta_salida is None:
-        from ..config import ensure_output_dir
-        ruta_salida = ensure_output_dir()
+    if output_path is None:
+        from config import ensure_output_dir
+        output_path = ensure_output_dir()
     else:
-        ruta_salida = Path(ruta_salida)
+        output_path = Path(output_path)
 
-    ruta_salida.mkdir(parents=True, exist_ok=True)
+    output_path.mkdir(parents=True, exist_ok=True)
 
-    nombre_limpio = titulo.lower().replace(" ", "_")[:50]
-    nombre_archivo = f"thumbnail_{nombre_limpio}.png"
-    ruta_archivo = ruta_salida / nombre_archivo
+    clean_name = title.lower().replace(" ", "_")[:50]
+    filename = f"thumbnail_{clean_name}.png"
+    file_path = output_path / filename
 
-    print(f"  Generando miniatura: {titulo}")
-    img = generar_imagen(prompt, ancho=1280, alto=720)
-    guardar_imagen(img, ruta_archivo)
-    print(f"  Guardado: {ruta_archivo}")
+    logger.info(f"  Generating thumbnail: {title}")
+    img = generate_image(prompt, width=1280, height=720)
+    save_image(img, file_path)
+    logger.info(f"  Saved: {file_path}")
 
-    return ruta_archivo
+    return file_path

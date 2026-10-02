@@ -1,5 +1,25 @@
+# Byte-compiled / optimized / runnable Python files
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Application Output
 output/
+
+# Environment Secrets
 .env
-*.sqlite
